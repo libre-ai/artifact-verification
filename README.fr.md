@@ -1,21 +1,23 @@
 <!-- SPDX-FileCopyrightText: 2026 Libre AI contributors -->
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
-<!-- Written for the retained Libre AI portfolio on 2026-09-14; earlier source documents and revisions retain their original licensing. -->
 
-# Libre AI Artifact Verification
+# Vérifier un artefact avant de l'intégrer
+
+Détecter un fichier modifié, absent ou ajouté et vérifier que les preuves fournies correspondent au contenu attendu.
+
+- **Bibliothèque Rust `libre-ai-artifact`** : compare les fichiers au manifeste, aux tailles et aux empreintes annoncées ; refuse les preuves incohérentes ou manquantes pour une livraison.
+- **Paquet TypeScript `@libre-ai/provenance`** : signe et vérifie un relevé de contributions avec une clé Ed25519 fournie par l'appelant.
+
+## Essayer
+
+Le code est en cours d'intégration locale. Placez `schemas-and-contracts` à côté de ce dépôt, puis lancez :
+
+```sh
+cargo test --locked
+```
+
+Les [exemples testés](tests/candidate_verification.rs) montrent les cas acceptés et refusés. Le paquet TypeScript se trouve dans [`packages/provenance`](packages/provenance).
+
+Ces bibliothèques ne décident pas seules à qui faire confiance : l'application doit sélectionner les preuves et clés admises. Aucun paquet n'est publié sur un registre à ce stade.
 
 [English](README.md)
-
-Avant d’intégrer ou de publier un artefact, les développeurs peuvent avoir besoin de comparer son contenu exact à un manifeste et aux preuves associées. Ce projet explore des contrôles rendant visibles les octets modifiés, les fichiers absents et les preuves indisponibles, pour comprendre les écarts avant une décision d’intégration.
-
-## Usages visés
-
-- Détecter les fichiers modifiés, manquants ou inattendus dans un artefact.
-- Comparer leur contenu aux tailles et empreintes déclarées dans un manifeste.
-- Vérifier les signatures requises selon les règles de confiance choisies pour cet artefact.
-
-## Disponibilité
-
-Ce dépôt contient actuellement uniquement de la documentation ; aucun outil installable n’est disponible.
-
-Découvrez le [catalogue des projets Libre AI](https://github.com/libre-ai/.github/blob/main/profile/README.fr.md).

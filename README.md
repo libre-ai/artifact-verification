@@ -1,21 +1,23 @@
 <!-- SPDX-FileCopyrightText: 2026 Libre AI contributors -->
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
-<!-- Written for the retained Libre AI portfolio on 2026-09-14; earlier source documents and revisions retain their original licensing. -->
 
-# Libre AI Artifact Verification
+# Verify an artifact before integration
+
+Detect changed, missing or unexpected files and check that supplied evidence binds to the expected content.
+
+- **Rust library `libre-ai-artifact`**: compares files against manifest sizes and digests; refuses inconsistent or missing evidence for releases.
+- **TypeScript package `@libre-ai/provenance`**: signs and verifies contribution records using an Ed25519 key supplied by the caller.
+
+## Try it
+
+Code is undergoing local integration. Place `schemas-and-contracts` next to this repository, then run:
+
+```sh
+cargo test --locked
+```
+
+The [tested examples](tests/candidate_verification.rs) cover accepted and refused inputs. The TypeScript package lives in [`packages/provenance`](packages/provenance).
+
+These libraries do not establish trust by themselves: the application must select trusted evidence and keys. No package has been published to a registry at this stage.
 
 [Français](README.fr.md)
-
-Before integrating or releasing an artifact, developers may need to compare its exact contents with a manifest and accompanying evidence. This project explores checks that make changed bytes, missing files and unavailable evidence visible. Its focus is a result that helps developers understand discrepancies before making an integration decision.
-
-## Intended uses
-
-- Detect changed, missing or unexpected files within an artifact.
-- Compare file contents with the sizes and digests declared in a manifest.
-- Check required signature evidence against the trust rules selected for that artifact.
-
-## Availability
-
-This repository currently contains documentation only; no installable tool is available.
-
-Explore the [Libre AI project catalogue](https://github.com/libre-ai/.github/blob/main/profile/README.md).

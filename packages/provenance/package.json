@@ -1,0 +1,58 @@
+{
+  "name": "@libre-ai/provenance",
+  "version": "0.2.0",
+  "description": "Agent contributor lineage (BOT-C): build and Ed25519-verify AgentContributorLineage v1 records (couche 3).",
+  "private": true,
+  "license": "EUPL-1.2",
+  "type": "module",
+  "keywords": [
+    "libre-ai",
+    "provenance",
+    "lineage",
+    "ed25519",
+    "bot-c"
+  ],
+  "homepage": "https://libre-ai.fr",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/libre-ai/artifact-verification.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "bun": ">=1.4.0"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "check:bun:runtime": "bun node_modules/@libre-ai/governance/tools/quality/check-bun-minimum.ts",
+    "check:bun": "bun ../../node_modules/@libre-ai/governance/tools/quality/check-bun-minimum.ts",
+    "check:toolchain": "bun run check:bun && bun node_modules/@libre-ai/governance/tools/quality/check-toolchain.ts",
+    "check:secret-scan": "bun run check:bun:runtime && bun node_modules/@libre-ai/governance/tools/quality/check-secret-scan.ts",
+    "check:personal-data": "bun run check:bun:runtime && bun node_modules/@libre-ai/governance/tools/quality/check-personal-data-boundary.ts",
+    "lint": "bun run check:bun:runtime && biome ci .",
+    "typecheck": "bun run check:bun:runtime && tsc --noEmit -p tsconfig.json",
+    "pretest": "bun run check:bun",
+    "test": "bun test",
+    "check": "bun run check:bun && bun run check:toolchain && bun run check:secret-scan && bun run check:personal-data && bun run lint && bun run typecheck && bun run test",
+    "precheck:bun:runtime": "bun run check:bun",
+    "precheck:toolchain": "bun run check:bun",
+    "precheck:secret-scan": "bun run check:bun",
+    "precheck:personal-data": "bun run check:bun",
+    "prelint": "bun run check:bun",
+    "pretypecheck": "bun run check:bun",
+    "precheck": "bun run check:bun"
+  },
+  "packageManager": "bun@1.4.0-canary.1",
+  "overrides": {
+    "fast-uri": "4.1.4"
+  },
+  "devDependencies": {
+    "@libre-ai/governance": "file:../../../project-governance",
+    "@biomejs/biome": "2.5.3",
+    "@types/bun": "1.3.14",
+    "typescript": "7.0.2"
+  }
+}

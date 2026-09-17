@@ -1,0 +1,146 @@
+{
+  "sources": [
+    {
+      "source": "artifacts",
+      "revision": "04cfe1e28d0e3857752fb915513ac2dbc44022d6",
+      "files": [
+        {
+          "sourcePath": ".gitignore",
+          "destinationPath": ".gitignore",
+          "sha256": "19b23de57a80020117177f6f3a34b5b5ce98c2623a8e8e6e211453bbf6458bfa"
+        },
+        {
+          "sourcePath": "Cargo.lock",
+          "destinationPath": "Cargo.lock",
+          "sha256": "133c2b57d8314f022bde7e6568be4e75537914f49a3bac50d183754b2b799f02"
+        },
+        {
+          "sourcePath": "Cargo.toml",
+          "destinationPath": "Cargo.toml",
+          "sha256": "a51924b1281b748f9b43db527d5e4289706fcda9c625667f8093dcaaf81ef7d3"
+        },
+        {
+          "sourcePath": "LICENSES/EUPL-1.2.txt",
+          "destinationPath": "LICENSES/EUPL-1.2.txt",
+          "sha256": "57fb42fbcd0b037ce528ed8f72f1ec095d67bc6825ecf1448ff39be1fe68a4b4"
+        },
+        {
+          "sourcePath": "REUSE.toml",
+          "destinationPath": "REUSE.toml",
+          "sha256": "456356428091a0bcf09b897e703aec6ddf3d6adf520956db8059218a854c2591"
+        },
+        {
+          "sourcePath": "biome.json",
+          "destinationPath": "biome.json",
+          "sha256": "b96763b1d5962da06fe26679e02dfcdbdc9defc57ed0e2a07ce51f1beeedf567"
+        },
+        {
+          "sourcePath": "bun.lock",
+          "destinationPath": "bun.lock",
+          "sha256": "a523b9d1414298e5f0b6b6a1543543e7b66472e6e95d8666dd73d3b2e92c79a6"
+        },
+        {
+          "sourcePath": "bunfig.toml",
+          "destinationPath": "bunfig.toml",
+          "sha256": "5da4d7eb4d1e5c1c37d487034e56773e8e1f568daec675b114c5257942f48342"
+        },
+        {
+          "sourcePath": "deny.toml",
+          "destinationPath": "deny.toml",
+          "sha256": "8fbd07c98a3d69cfdd87e7cd27ed249bb73fecb77fd35ae7846fa84f65fd7eaf"
+        },
+        {
+          "sourcePath": "package.json",
+          "destinationPath": "package.json",
+          "sha256": "79019cfe401fd7182de918c4201fe7e9fb66d1a213c54ed5c30cbae24e09d6b9"
+        },
+        {
+          "sourcePath": "rust-toolchain.toml",
+          "destinationPath": "rust-toolchain.toml",
+          "sha256": "eb8ed53423a7d9d3e3b3fc0367ee89426b4b9385114465919926b2829bfe7ecd"
+        },
+        {
+          "sourcePath": "src/digest.rs",
+          "destinationPath": "src/digest.rs",
+          "sha256": "73894f2f3672be32bea44b312aa77d8330df31f27a8f1bd79afaa89ba47e72b3"
+        },
+        {
+          "sourcePath": "src/lib.rs",
+          "destinationPath": "src/lib.rs",
+          "sha256": "7021245d33e6b1b0557f09f321e0d2ed8949a13f312635ecd020bb4959059148"
+        },
+        {
+          "sourcePath": "src/model.rs",
+          "destinationPath": "src/model.rs",
+          "sha256": "0b0bcc44977500af2b6c95534e363a9627956ac68825529e7e137bffd3ec5832"
+        },
+        {
+          "sourcePath": "src/verify.rs",
+          "destinationPath": "src/verify.rs",
+          "sha256": "e21de61d923cfe87b6b293c01ca053b0de7d48e5419d599bdb28d5c6fd60f635"
+        },
+        {
+          "sourcePath": "tests/candidate_verification.rs",
+          "destinationPath": "tests/candidate_verification.rs",
+          "sha256": "b5d1461c1ecb9a16f4b95c9d619c78f4171fa623ecb6668ee4c30da0f3509ce4"
+        }
+      ]
+    },
+    {
+      "source": "provenance",
+      "revision": "577a9fcea374c64f92abc22e7c124fe3c9f7d1d2",
+      "files": [
+        {
+          "sourcePath": ".gitignore",
+          "destinationPath": "packages/provenance/.gitignore",
+          "sha256": "19b23de57a80020117177f6f3a34b5b5ce98c2623a8e8e6e211453bbf6458bfa"
+        },
+        {
+          "sourcePath": "LICENSES/EUPL-1.2.txt",
+          "destinationPath": "packages/provenance/LICENSES/EUPL-1.2.txt",
+          "sha256": "57fb42fbcd0b037ce528ed8f72f1ec095d67bc6825ecf1448ff39be1fe68a4b4"
+        },
+        {
+          "sourcePath": "REUSE.toml",
+          "destinationPath": "packages/provenance/REUSE.toml",
+          "sha256": "8d7fbe6bfdd9ccbeb74fadc56036d671ca4958ca0533824d6feb651077e41cfd"
+        },
+        {
+          "sourcePath": "biome.json",
+          "destinationPath": "packages/provenance/biome.json",
+          "sha256": "aef412798f637cd348188f1071fb1ea7c01c5e4bb3de8cd878a25f4dd4a5173d"
+        },
+        {
+          "sourcePath": "bun.lock",
+          "destinationPath": "packages/provenance/bun.lock",
+          "sha256": "5dcf27c5f237d3068f6e5e76e7e4f5cca6a6a2c39b08de5bf2adf98129e868ef"
+        },
+        {
+          "sourcePath": "bunfig.toml",
+          "destinationPath": "packages/provenance/bunfig.toml",
+          "sha256": "5da4d7eb4d1e5c1c37d487034e56773e8e1f568daec675b114c5257942f48342"
+        },
+        {
+          "sourcePath": "package.json",
+          "destinationPath": "packages/provenance/package.json",
+          "sha256": "01d07766f027a1285bb948ad949735f807f961fc1a4d40ffd5e58451acaeec38"
+        },
+        {
+          "sourcePath": "src/index.ts",
+          "destinationPath": "packages/provenance/src/index.ts",
+          "sha256": "eaa6d4d7ab89be2b9161bf16db6bb7bf2deafac763e09e1c1da992ecf1cff849"
+        },
+        {
+          "sourcePath": "src/provenance.test.ts",
+          "destinationPath": "packages/provenance/src/provenance.test.ts",
+          "sha256": "0c22478cd6e71470c4eced70b6ef69bb23bb2a8719d68c6d08e7ff8792c70b7d"
+        },
+        {
+          "sourcePath": "tsconfig.json",
+          "destinationPath": "packages/provenance/tsconfig.json",
+          "sha256": "137bfb257c352a95fc464c9b3f07051f950378cc00e2f79a28dd3d79f80040a5"
+        }
+      ]
+    }
+  ]
+}
