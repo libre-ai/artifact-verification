@@ -30,7 +30,13 @@ non_goals:
 dependencies:
   - on: libre-ai/project-governance
     why: Current fleet doctrine and reusable verification workflows.
-    pinned: "github:libre-ai/project-governance#7c2238d6185e59d446586688ca7db32e6a17d3e0"
+    pinned: "github:libre-ai/project-governance#46061644fb17bc14e67d3501602b7904fce75ae0"
+  - on: libre-ai/schemas-and-contracts
+    # Cargo.toml pins `crates/sdk-rs` by git at this revision, the ref the
+    # governance composition checks out for schemas-and-contracts; CI compiles
+    # that sibling checkout in place of the git source (cargo source replacement).
+    why: Rust contract types (libre-ai-contract-types) consumed by the library, never redefined here.
+    pinned: "github:libre-ai/schemas-and-contracts#4f3d53c3ecd96e7064057afd1587de41b66f13c1"
 maturity: idea
 confidence: medium
 exposure: idea
