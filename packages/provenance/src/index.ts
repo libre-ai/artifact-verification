@@ -128,10 +128,11 @@ function observationKey(observation: ObservationRef): string {
  * signature lends it authority. The brick refuses it at both ends.
  *
  * TODO(context): the symmetric `minItems: 1` on `contributors` belongs to the
- * schema, in the `contracts` repository — not fixable from here. Until it lands
- * there, this brick is stricter than its contract and other producers may still
- * emit contributor-less records, which this brick now refuses on sight.
- * Tracked: https://github.com/libre-ai/contracts/issues/2
+ * schema, in the `schemas-and-contracts` repository — not fixable from here.
+ * Until it lands there, this brick is stricter than its contract and other
+ * producers may still emit contributor-less records, which this brick now
+ * refuses on sight. Tracked as issue #2 of the former libre-ai/contracts
+ * repository, retired on 2026-10-07; that issue was not transferred.
  *
  * Returns a fixed message — never record content, so it is safe to surface on
  * the untrusted path — or null when the shape holds.

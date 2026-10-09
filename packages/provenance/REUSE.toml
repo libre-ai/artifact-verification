@@ -2,7 +2,7 @@
 version = 1
 SPDX-PackageName = "provenance"
 SPDX-PackageSupplier = "Libre AI <https://github.com/libre-ai>"
-SPDX-PackageDownloadLocation = "https://github.com/libre-ai/provenance"
+SPDX-PackageDownloadLocation = "https://github.com/libre-ai/artifact-verification"
 
 [[annotations]]
 path = ["**"]
