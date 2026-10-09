@@ -10,7 +10,9 @@ Doctrine lives upstream: https://raw.githubusercontent.com/libre-ai/project-gove
 ## Boundaries
 
 - Contract types are canonical in `libre-ai/schemas-and-contracts`
-  (`crates/sdk-rs`, consumed as a sibling path), never redefined here.
+  (`crates/sdk-rs`, pinned by git at the composed revision; the CI
+  composition compiles its sibling checkout in place of that source), never
+  redefined here.
 - These libraries verify content against supplied evidence; they do not
   select trusted evidence or keys — that choice stays with the consumer.
 - No storage, network or key custody responsibility is added here.
