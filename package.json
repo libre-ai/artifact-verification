@@ -26,7 +26,8 @@
     "test": "cargo test --locked && bun run --cwd packages/provenance test",
     "check": "bun run check:bun && bun run check:toolchain && bun run check:secret-scan && bun run check:personal-data && bun run lint && bun run check:rust && bun run check:provenance && bun run check:coverage",
     "pretest": "bun run check:bun",
-    "check:rust": "bun run check:bun:runtime && cargo fmt --all --check && cargo clippy --locked --all-targets -- -D warnings && cargo test --locked",
+    "check:dependency-policy": "bun run check:bun:runtime && bun test tools/quality/check-dependency-policy.test.ts && bun tools/quality/check-dependency-policy.ts",
+    "check:rust": "bun run check:bun:runtime && bun run check:dependency-policy && cargo fmt --all --check && cargo clippy --locked --all-targets -- -D warnings && cargo test --locked",
     "check:provenance": "bun run check:bun:runtime && bun run --cwd packages/provenance check",
     "check:coverage": "bun run check:bun:runtime && cargo coverage-check"
   },
