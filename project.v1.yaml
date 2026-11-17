@@ -36,7 +36,7 @@ dependencies:
     # governance composition checks out for schemas-and-contracts; CI compiles
     # that sibling checkout in place of the git source (cargo source replacement).
     why: Rust contract types (libre-ai-contract-types) consumed by the library, never redefined here.
-    pinned: "github:libre-ai/schemas-and-contracts#a82d7b54cfda00bfcbbdff34a3c34f24a2468a6e"
+    pinned: "github:libre-ai/schemas-and-contracts#5ed1f716d0061117b4a59935b5558384612a2914"
 maturity: idea
 confidence: medium
 exposure: idea

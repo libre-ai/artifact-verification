@@ -16,7 +16,7 @@ Code is undergoing local integration. Place `schemas-and-contracts` next to this
 cargo test --locked
 ```
 
-The [tested examples](tests/candidate_verification.rs) cover accepted and refused inputs. The TypeScript package lives in [`packages/provenance`](packages/provenance).
+The [tested examples](tests/candidate_verification.rs) cover accepted and refused inputs. [Signed manifest examples](tests/signed_manifest_verification.rs) check a detached Ed25519 signature record against a key registry chosen by the application, then the files, and replay the vectors of the candidate `artifact-manifest-signatures.v1` contract. The TypeScript package lives in [`packages/provenance`](packages/provenance).
 
 These libraries do not establish trust by themselves: the application must select trusted evidence and keys. No package has been published to a registry at this stage.
 

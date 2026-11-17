@@ -16,7 +16,7 @@ Le code est en cours d'intégration locale. Placez `schemas-and-contracts` à c�
 cargo test --locked
 ```
 
-Les [exemples testés](tests/candidate_verification.rs) montrent les cas acceptés et refusés. Le paquet TypeScript se trouve dans [`packages/provenance`](packages/provenance).
+Les [exemples testés](tests/candidate_verification.rs) montrent les cas acceptés et refusés. Les [exemples de manifeste signé](tests/signed_manifest_verification.rs) vérifient un relevé détaché de signatures Ed25519 contre un registre de clés choisi par l'application, puis les fichiers, et rejouent les vecteurs du contrat candidat `artifact-manifest-signatures.v1`. Le paquet TypeScript se trouve dans [`packages/provenance`](packages/provenance).
 
 Ces bibliothèques ne décident pas seules à qui faire confiance : l'application doit sélectionner les preuves et clés admises. Aucun paquet n'est publié sur un registre à ce stade.
 
