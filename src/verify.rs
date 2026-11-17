@@ -1,15 +1,16 @@
 use crate::digest::{ContentDescriptor, content_descriptors, descriptor_set_digest};
+use crate::signature::{self, SignedVerifiedArtifact, TrustedKeySet, VerifiedSignatures};
 use crate::{
     ArtifactKind, ArtifactRefusal, CandidateFile, VerifiedArtifact, VerifiedEvidence,
     canonical_document_digest,
 };
-use libre_ai_contract_types::ContractRegistry;
 use libre_ai_contract_types::generated::artifact_manifest_v1::{
     LibreAiArtifactManifestV1, LibreAiArtifactManifestV1ArtifactType,
 };
 use libre_ai_contract_types::generated::evidence_report_v1::{
     LibreAiEvidenceReportV1, LibreAiEvidenceReportV1Status,
 };
+use libre_ai_contract_types::{ContractRegistry, ContractValidationIssue};
 use serde_json::Value;
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -114,7 +115,70 @@ impl ArtifactVerifier {
         }))
     }
 
-    fn validate_schema(
+    /// Admits a `signing-keys.v1` registry from the octets the caller trusts (rules K0
+    /// to K6 of `artifact-manifest-signatures.v1`). Any broken rule refuses the whole
+    /// registry with `KeySetInvalid`.
+    pub fn admit_signing_keys(
+        &self,
+        registry_octets: &[u8],
+    ) -> Result<TrustedKeySet, ArtifactRefusal> {
+        signature::admit_signing_keys(self, registry_octets)
+    }
+
+    /// Verifies a detached `artifact-manifest-signatures.v1` record over the received
+    /// manifest octets (rules S0 to S10), at the instant `now` the caller read from a
+    /// trusted clock. Files, sizes and digests are not checked: see
+    /// [`Self::verify_signed_candidate`].
+    pub fn verify_manifest_signatures(
+        &self,
+        manifest_octets: &[u8],
+        record_octets: &[u8],
+        keys: &TrustedKeySet,
+        now: &str,
+    ) -> Result<VerifiedSignatures, ArtifactRefusal> {
+        signature::verify_manifest_signatures(self, manifest_octets, record_octets, keys, now)
+            .map(|(_, signatures)| signatures)
+    }
+
+    /// Signature acceptance, then [`Self::verify_candidate`] on the same manifest
+    /// value: the first refusal of the two is returned.
+    pub fn verify_signed_candidate(
+        &self,
+        manifest_octets: &[u8],
+        evidence_document: Option<&Value>,
+        files: &[CandidateFile<'_>],
+        record_octets: &[u8],
+        keys: &TrustedKeySet,
+        now: &str,
+    ) -> Result<SignedVerifiedArtifact, ArtifactRefusal> {
+        let (manifest_document, signatures) =
+            signature::verify_manifest_signatures(self, manifest_octets, record_octets, keys, now)?;
+        let artifact = self.verify_candidate(&manifest_document, evidence_document, files)?;
+        Ok(SignedVerifiedArtifact {
+            artifact,
+            signatures,
+        })
+    }
+
+    pub(crate) fn validate_manifest_schema(&self, document: &Value) -> Result<(), ArtifactRefusal> {
+        self.validate_schema(
+            MANIFEST_SCHEMA,
+            document,
+            ArtifactRefusal::ManifestSchemaInvalid,
+        )
+    }
+
+    pub(crate) fn schema_issues(
+        &self,
+        schema: &str,
+        document: &Value,
+    ) -> Result<Vec<ContractValidationIssue>, ArtifactRefusal> {
+        self.registry
+            .validate(schema, document)
+            .map_err(|_| ArtifactRefusal::RegistryUnavailable)
+    }
+
+    pub(crate) fn validate_schema(
         &self,
         schema: &str,
         document: &Value,
@@ -128,7 +192,7 @@ impl ArtifactVerifier {
     }
 }
 
-fn artifact_kind(kind: LibreAiArtifactManifestV1ArtifactType) -> ArtifactKind {
+pub(crate) fn artifact_kind(kind: LibreAiArtifactManifestV1ArtifactType) -> ArtifactKind {
     match kind {
         LibreAiArtifactManifestV1ArtifactType::Build => ArtifactKind::Build,
         LibreAiArtifactManifestV1ArtifactType::Dataset => ArtifactKind::Dataset,

@@ -49,6 +49,13 @@ pub enum ArtifactRefusal {
     EvidenceNotPassing,
     EvidenceSubjectMismatch,
     CanonicalizationFailed,
+    KeySetInvalid,
+    SignatureRequired,
+    SignatureMalformed,
+    SignatureKeyUnknown,
+    SignatureKeyNotActive,
+    SignatureKeyNotAuthorized,
+    SignatureInvalid,
 }
 
 impl ArtifactRefusal {
@@ -73,6 +80,13 @@ impl ArtifactRefusal {
             Self::EvidenceNotPassing => "artifact.evidence-not-passing",
             Self::EvidenceSubjectMismatch => "artifact.evidence-subject-mismatch",
             Self::CanonicalizationFailed => "artifact.canonicalization-failed",
+            Self::KeySetInvalid => "artifact.key-set-invalid",
+            Self::SignatureRequired => "artifact.signature-required",
+            Self::SignatureMalformed => "artifact.signature-malformed",
+            Self::SignatureKeyUnknown => "artifact.signature-key-unknown",
+            Self::SignatureKeyNotActive => "artifact.signature-key-not-active",
+            Self::SignatureKeyNotAuthorized => "artifact.signature-key-not-authorized",
+            Self::SignatureInvalid => "artifact.signature-invalid",
         }
     }
 }
