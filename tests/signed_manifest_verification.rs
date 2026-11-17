@@ -2,7 +2,7 @@
 //! `artifact-manifest-signatures.v1` / `signing-keys.v1` of schemas-and-contracts.
 //!
 //! The contract vectors and the strict Ed25519 vectors are read from the
-//! schemas-and-contracts tree that Cargo compiled (located by `cargo metadata`), never
+//! schemas-and-contracts revision that Cargo compiled (located by `cargo metadata`), never
 //! copied here: bumping the pin replays the corpus of the new revision.
 
 use ed25519_dalek::{Signer, SigningKey};
@@ -31,8 +31,8 @@ fn verifier() -> ArtifactVerifier {
     ArtifactVerifier::embedded().expect("embedded contracts compile")
 }
 
-/// Root of the schemas-and-contracts tree compiled as `libre-ai-contract-types`.
-fn contracts_root() -> PathBuf {
+/// The `libre-ai-contract-types` package Cargo resolved, as `cargo metadata` reports it.
+fn contract_types_package() -> Value {
     let cargo = std::env::var("CARGO").unwrap_or_else(|_| "cargo".to_owned());
     let output = Command::new(cargo)
         .args([
@@ -53,22 +53,63 @@ fn contracts_root() -> PathBuf {
         .expect("packages")
         .iter()
         .find(|package| package["name"] == "libre-ai-contract-types")
-        .expect("libre-ai-contract-types is a dependency");
+        .expect("libre-ai-contract-types is a dependency")
+        .clone();
     println!("contract vectors from {}", package["id"]);
+    package
+}
+
+/// The Git revision in a Cargo git package id (`git+<url>?rev=<rev>#<rev>`).
+fn pinned_revision(package_id: &str) -> &str {
+    let revision = package_id
+        .split_once("?rev=")
+        .and_then(|(_, rest)| rest.split_once('#'))
+        .map(|(revision, _)| revision)
+        .expect("git revision in the package id");
+    assert!(
+        revision.len() == 40 && revision.bytes().all(|byte| byte.is_ascii_hexdigit()),
+        "full git revision in the package id"
+    );
+    revision
+}
+
+/// Bytes of `relative` in the schemas-and-contracts revision compiled as
+/// `libre-ai-contract-types`.
+///
+/// From its git source, Cargo compiles a checkout of the whole repository, so the
+/// fixtures sit two levels above `crates/sdk-rs`. The fleet composition substitutes
+/// a directory source holding the crate subtree only, materialised from the
+/// schemas-and-contracts checkout it places beside this repository at the same
+/// revision: the fixture is then read from that checkout's committed objects at the
+/// revision Cargo resolved (`git show <rev>:<path>`), never from its working tree.
+fn contract_fixture_bytes(relative: &str) -> Vec<u8> {
+    let package = contract_types_package();
     let manifest_path = PathBuf::from(package["manifest_path"].as_str().expect("path"));
-    // crates/sdk-rs/Cargo.toml -> repository root.
-    manifest_path
-        .ancestors()
-        .nth(3)
-        .expect("repository root")
-        .to_path_buf()
+    let crate_dir = manifest_path.parent().expect("crate directory");
+    if crate_dir.ends_with("crates/sdk-rs") {
+        let root = crate_dir.ancestors().nth(2).expect("repository root");
+        return std::fs::read(root.join(relative)).expect("declared contract fixture is readable");
+    }
+    let revision = pinned_revision(package["id"].as_str().expect("package id"));
+    let output = Command::new("git")
+        .args([
+            "-C",
+            concat!(env!("CARGO_MANIFEST_DIR"), "/../schemas-and-contracts"),
+            "show",
+            &format!("{revision}:{relative}"),
+        ])
+        .output()
+        .expect("git runs");
+    assert!(
+        output.status.success(),
+        "declared contract fixture {relative} is readable at {revision} in the composed checkout"
+    );
+    output.stdout
 }
 
 /// A declared fixture that cannot be read fails the test, never skips it.
 fn contract_fixture(relative: &str) -> Value {
-    let path = contracts_root().join(relative);
-    let bytes = std::fs::read(&path).expect("declared contract fixture is readable");
-    serde_json::from_slice(&bytes).expect("contract fixture is JSON")
+    serde_json::from_slice(&contract_fixture_bytes(relative)).expect("contract fixture is JSON")
 }
 
 fn base64_value(character: u8) -> u32 {

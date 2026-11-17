@@ -1,6 +1,6 @@
 //! Contract-vector tests of the crate-private signature primitives.
 //!
-//! The vectors are read from the schemas-and-contracts tree that Cargo compiled
+//! The vectors are read from the schemas-and-contracts revision that Cargo compiled
 //! (located by `cargo metadata`), never copied here. A declared fixture that cannot
 //! be read fails the test, never skips it.
 
@@ -17,8 +17,8 @@ use std::process::Command;
 const SIGNATURE_VECTORS: &str = "contracts/fixtures/artifact-manifest-signatures-v1/vectors.json";
 const STRICT_VECTORS: &str = "contracts/fixtures/build-brief-v2/strict-ed25519-vectors.json";
 
-/// Root of the schemas-and-contracts tree compiled as `libre-ai-contract-types`.
-fn contracts_root() -> PathBuf {
+/// The `libre-ai-contract-types` package Cargo resolved, as `cargo metadata` reports it.
+fn contract_types_package() -> Value {
     let cargo = std::env::var("CARGO").unwrap_or_else(|_| "cargo".to_owned());
     let output = Command::new(cargo)
         .args([
@@ -34,25 +34,66 @@ fn contracts_root() -> PathBuf {
         .expect("cargo metadata runs");
     assert!(output.status.success(), "cargo metadata failed");
     let metadata: Value = serde_json::from_slice(&output.stdout).expect("metadata is JSON");
-    let package = metadata["packages"]
+    metadata["packages"]
         .as_array()
         .expect("packages")
         .iter()
         .find(|package| package["name"] == "libre-ai-contract-types")
-        .expect("libre-ai-contract-types is a dependency");
-    let manifest_path = PathBuf::from(package["manifest_path"].as_str().expect("path"));
-    // crates/sdk-rs/Cargo.toml -> repository root.
-    manifest_path
-        .ancestors()
-        .nth(3)
-        .expect("repository root")
-        .to_path_buf()
+        .expect("libre-ai-contract-types is a dependency")
+        .clone()
 }
 
+/// The Git revision in a Cargo git package id (`git+<url>?rev=<rev>#<rev>`).
+fn pinned_revision(package_id: &str) -> &str {
+    let revision = package_id
+        .split_once("?rev=")
+        .and_then(|(_, rest)| rest.split_once('#'))
+        .map(|(revision, _)| revision)
+        .expect("git revision in the package id");
+    assert!(
+        revision.len() == 40 && revision.bytes().all(|byte| byte.is_ascii_hexdigit()),
+        "full git revision in the package id"
+    );
+    revision
+}
+
+/// Bytes of `relative` in the schemas-and-contracts revision compiled as
+/// `libre-ai-contract-types`.
+///
+/// From its git source, Cargo compiles a checkout of the whole repository, so the
+/// fixtures sit two levels above `crates/sdk-rs`. The fleet composition substitutes
+/// a directory source holding the crate subtree only, materialised from the
+/// schemas-and-contracts checkout it places beside this repository at the same
+/// revision: the fixture is then read from that checkout's committed objects at the
+/// revision Cargo resolved (`git show <rev>:<path>`), never from its working tree.
+fn contract_fixture_bytes(relative: &str) -> Vec<u8> {
+    let package = contract_types_package();
+    let manifest_path = PathBuf::from(package["manifest_path"].as_str().expect("path"));
+    let crate_dir = manifest_path.parent().expect("crate directory");
+    if crate_dir.ends_with("crates/sdk-rs") {
+        let root = crate_dir.ancestors().nth(2).expect("repository root");
+        return std::fs::read(root.join(relative)).expect("declared contract fixture is readable");
+    }
+    let revision = pinned_revision(package["id"].as_str().expect("package id"));
+    let output = Command::new("git")
+        .args([
+            "-C",
+            concat!(env!("CARGO_MANIFEST_DIR"), "/../schemas-and-contracts"),
+            "show",
+            &format!("{revision}:{relative}"),
+        ])
+        .output()
+        .expect("git runs");
+    assert!(
+        output.status.success(),
+        "declared contract fixture {relative} is readable at {revision} in the composed checkout"
+    );
+    output.stdout
+}
+
+/// A declared fixture that cannot be read fails the test, never skips it.
 fn contract_fixture(relative: &str) -> Value {
-    let path = contracts_root().join(relative);
-    let bytes = std::fs::read(&path).expect("declared contract fixture is readable");
-    serde_json::from_slice(&bytes).expect("contract fixture is JSON")
+    serde_json::from_slice(&contract_fixture_bytes(relative)).expect("contract fixture is JSON")
 }
 
 fn b64url(text: &Value) -> Vec<u8> {
