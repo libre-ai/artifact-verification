@@ -9,8 +9,7 @@ use ed25519_dalek::{Signer, SigningKey};
 use libre_ai_artifact::{
     ArtifactRefusal, ArtifactVerifier, CandidateFile, MAX_SIGNATURES, MAX_TRUSTED_KEYS,
     SIGNED_MESSAGE_DOMAIN, TrustedKeySet, VerifiedSignatures, artifact_content_digest,
-    canonical_document_digest, ed25519_point_is_admissible, ed25519_verify_strict,
-    manifest_signed_message, sha256_hex,
+    canonical_document_digest, ed25519_point_is_admissible, sha256_hex,
 };
 use libre_ai_contract_types::strict_json;
 use serde_json::{Value, json};
@@ -199,8 +198,20 @@ fn admit(entries: Vec<Value>) -> Result<TrustedKeySet, ArtifactRefusal> {
     verifier().admit_signing_keys(&registry_octets(entries))
 }
 
+/// Test-side signed message of S4 (the crate's builder is crate-private):
+/// `UTF8(schemaVersion) || 0x00 || SHA-256(RFC 8785(manifest))`. Checked against
+/// the contract's published messages below.
+fn signed_message(manifest: &Value) -> Vec<u8> {
+    let domain = manifest["schemaVersion"].as_str().expect("schemaVersion");
+    let canonical = strict_json::canonicalize(manifest).expect("RFC 8785 form");
+    let mut message = domain.as_bytes().to_vec();
+    message.push(0x00);
+    message.extend_from_slice(&Sha256::digest(&canonical));
+    message
+}
+
 fn sign(key: &TestKey, manifest: &Value) -> String {
-    let message = manifest_signed_message(manifest).expect("signed message");
+    let message = signed_message(manifest);
     b64_encode(&key.signing.sign(&message).to_bytes(), true)
 }
 
@@ -334,12 +345,13 @@ fn every_contract_vector_yields_its_expected_outcome() {
     let verifier = verifier();
     let mut failures = Vec::new();
 
-    // Published signed messages: built here from the strictly read manifest octets.
+    // Published signed messages: the test-side builder that signs every fixture of this
+    // file must reproduce them (the crate's builder is checked by its unit tests).
     let messages = vectors["messages"].as_object().expect("messages");
     for (name, expected) in messages {
         let manifest_octets = b64url(vectors["manifestOctets"][name].as_str().expect("octets"));
         let manifest = strict_json::parse(&manifest_octets).expect("strict manifest");
-        let built = manifest_signed_message(&manifest).expect("message");
+        let built = signed_message(&manifest);
         let expected = b64url(expected.as_str().expect("message"));
         let verdict = if built == expected { "ok" } else { "not ok" };
         println!("{verdict} message {name}");
@@ -475,29 +487,8 @@ fn strict_point_vectors_match_the_admission_profile() {
     assert_eq!(admissible, 3);
 }
 
-#[test]
-fn strict_signature_vectors_match_the_primitive() {
-    let vectors = contract_fixture("contracts/fixtures/build-brief-v2/strict-ed25519-vectors.json");
-    let signatures = vectors["signatures"].as_array().expect("signatures");
-    let mut accepted_count = 0_usize;
-    let mut failures = Vec::new();
-    for vector in signatures {
-        let field = |name: &str| b64url(vector[name].as_str().expect("field"));
-        let obtained =
-            ed25519_verify_strict(&field("publicKey"), &field("message"), &field("signature"));
-        accepted_count += usize::from(obtained);
-        if obtained != vector["accepted"].as_bool().expect("accepted") {
-            failures.push(vector["id"].as_str().expect("id").to_owned());
-        }
-    }
-    println!(
-        "signatures read {}, accepted {accepted_count}",
-        signatures.len()
-    );
-    assert!(failures.is_empty(), "signatures: {failures:?}");
-    assert_eq!(signatures.len(), 51);
-    assert_eq!(accepted_count, 2);
-}
+// The 51 strict signature vectors against the raw primitive are a unit test of the
+// crate (`src/signature_contract_tests.rs`): the primitive is crate-private.
 
 #[test]
 fn every_refused_strict_point_refuses_the_registry() {

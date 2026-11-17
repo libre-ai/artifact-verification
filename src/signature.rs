@@ -117,31 +117,23 @@ pub fn ed25519_point_is_admissible(encoded: &[u8]) -> bool {
     point.compress().to_bytes() == octets && !point.is_identity() && point.is_torsion_free()
 }
 
-/// Strict Ed25519 verification (S8): `A` and `R` admissible, `S < L`, then the
-/// equation. The checks on `A`, `R` and `S` run here, before the library, whatever
-/// the library does by default (SEMANTICS S8).
-#[must_use]
-pub fn ed25519_verify_strict(public_key: &[u8], message: &[u8], signature: &[u8]) -> bool {
-    let (Ok(public_key), Ok(signature)) = (
-        <[u8; POINT_LENGTH]>::try_from(public_key),
-        <[u8; SIGNATURE_LENGTH]>::try_from(signature),
-    ) else {
-        return false;
-    };
-    if !ed25519_point_is_admissible(&public_key) {
-        return false;
-    }
-    let Ok(verifying_key) = VerifyingKey::from_bytes(&public_key) else {
-        return false;
-    };
-    signature_verifies(&verifying_key, message, &signature)
-}
-
+/// Strict Ed25519 verification (S8) under an admitted key: the encoding checks of
+/// [`signature_encoding_is_admissible`], then the library equation.
 fn signature_verifies(
     verifying_key: &VerifyingKey,
     message: &[u8],
     signature: &[u8; SIGNATURE_LENGTH],
 ) -> bool {
+    signature_encoding_is_admissible(signature)
+        && verifying_key
+            .verify_strict(message, &Signature::from_bytes(signature))
+            .is_ok()
+}
+
+/// The checks of S8 on the signature octets that the consumer owes whatever the
+/// library does by default: `R` admissible (strict point profile) and `S < L`.
+/// Pure and library-free so that the contract vectors exercise it directly.
+fn signature_encoding_is_admissible(signature: &[u8; SIGNATURE_LENGTH]) -> bool {
     let (r_octets, s_octets) = signature.split_at(POINT_LENGTH);
     let Ok(s_octets) = <[u8; POINT_LENGTH]>::try_from(s_octets) else {
         return false;
@@ -152,16 +144,19 @@ fn signature_verifies(
     if Option::<Scalar>::from(Scalar::from_canonical_bytes(s_octets)).is_none() {
         return false;
     }
-    verifying_key
-        .verify_strict(message, &Signature::from_bytes(signature))
-        .is_ok()
+    true
 }
 
 /// The signed message of S4:
 /// `UTF8(manifest.schemaVersion) || 0x00 || SHA-256(RFC 8785(manifest))`.
 ///
-/// The manifest is the value read from its octets by the strict reader (S0).
-pub fn manifest_signed_message(manifest_document: &Value) -> Result<Vec<u8>, ArtifactRefusal> {
+/// Crate-private: the manifest must be the value read from its own octets by the
+/// strict reader (S0); a value parsed by any other reader is not conforming input.
+/// RFC 8785 is applied by `strict_json::canonicalize`, the contract crate's
+/// canonicalizer, which the contract vectors pin (`signed-non-jcs-digest`).
+pub(crate) fn manifest_signed_message(
+    manifest_document: &Value,
+) -> Result<Vec<u8>, ArtifactRefusal> {
     let domain = manifest_document
         .get("schemaVersion")
         .and_then(Value::as_str)
@@ -557,9 +552,14 @@ mod tests {
     }
 
     #[test]
-    fn primitive_refuses_wrong_lengths() {
+    fn point_profile_refuses_wrong_lengths() {
         assert!(!ed25519_point_is_admissible(&[0_u8; 31]));
-        assert!(!ed25519_verify_strict(&[0_u8; 31], b"", &[0_u8; 64]));
-        assert!(!ed25519_verify_strict(&[0_u8; 32], b"", &[0_u8; 63]));
+        assert!(!ed25519_point_is_admissible(&[0_u8; 33]));
     }
 }
+
+// The contract-vector tests read fixtures and fail loudly on an unreadable one; they
+// live in their own file so that this module stays free of panicking calls (L007).
+#[cfg(test)]
+#[path = "signature_contract_tests.rs"]
+mod contract_tests;
