@@ -24,6 +24,13 @@ yanked = "deny"
 # Explicit so the verdict does not move when cargo-deny 0.22.0 changes the
 # default scope from `all` to `workspace`.
 unmaintained = "all"
+# Waivers follow docs/security/ADVISORY-WAIVER-POLICY.md of project-governance
+# (dated, referenced, bounded); tools/quality/check-advisory-waivers.ts reads
+# this list from the composition.
+# waiver-review-anchor: 2026-11-24
+ignore = [
+  "RUSTSEC-2026-0543", # chrono is unmaintained, all versions affected and no fixed release; reached through libre-ai-contract-types; expires=2027-02-24; ref=https://rustsec.org/advisories/RUSTSEC-2026-0543
+]
 
 [licenses]
 confidence-threshold = 0.9
